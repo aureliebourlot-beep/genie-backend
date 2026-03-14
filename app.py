@@ -7,14 +7,12 @@ app = Flask(__name__)
 def home():
     return "HELLO OK"
 
-@app.route("/test", methods=["POST"])
+@app.route("/test")
 def test():
-    data = request.get_json()
-
-    question = data.get("message")
+    message = request.args.get("message")
 
     return jsonify({
-        "answer": f"Tu as envoyé: {question}"
+        "answer": f"Tu as envoyé: {message}"
     })
 
 if __name__ == "__main__":
