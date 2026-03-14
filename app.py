@@ -19,17 +19,15 @@ def home():
 
 @app.route("/ask")
 def ask():
-
     question = request.args.get("question")
 
     url = f"{DATABRICKS_HOST}/api/2.0/genie/spaces/{GENIE_SPACE_ID}/start-conversation"
 
     response = requests.post(url, headers=headers, json={
-        "message": question
+        "content": question
     })
 
     return jsonify(response.json())
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
