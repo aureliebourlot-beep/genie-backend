@@ -1,19 +1,35 @@
 from flask import Flask, request, jsonify
 import os
+import requests
 
 app = Flask(__name__)
 
+DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
+DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
+GENIE_SPACE_ID = os.getenv("GENIE_SPACE_ID")
+
+headers = {
+    "Authorization": f"Bearer {DATABRICKS_TOKEN}",
+    "Content-Type": "application/json"
+}
+
 @app.route("/")
 def home():
-    return "HELLO OK"
+    return "GENIE BACKEND OK"
 
-@app.route("/test")
-def test():
-    message = request.args.get("message")
+@app.route("/ask")
+def ask():
 
-    return jsonify({
-        "answer": f"Tu as envoyé: {message}"
+    question = request.args.get("question")
+
+    url = f"{DATABRICKS_HOST}/api/2.0/genie/spaces/{GENIE_SPACE_ID}/start-conversation"
+
+    response = requests.post(url, headers=headers, json={
+        "message": question
     })
+
+    return jsonify(response.json())
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
