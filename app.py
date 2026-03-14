@@ -25,7 +25,7 @@ def ask():
     if not question:
         return jsonify({"error": "Le paramètre question est requis"}), 400
 
-    # 1) Démarrer la conversation avec le premier message
+    # 1) Démarrer la conversation
     start_url = f"{DATABRICKS_HOST}/api/2.0/genie/spaces/{GENIE_SPACE_ID}/start-conversation"
     start_resp = requests.post(
         start_url,
@@ -44,7 +44,7 @@ def ask():
             "start_response": start_data
         }), 500
 
-    # 2) Vérifier l'état du message plusieurs fois
+    # 2) Vérifier l'état du message
     status_url = f"{DATABRICKS_HOST}/api/2.0/genie/spaces/{GENIE_SPACE_ID}/conversations/{conversation_id}/messages/{message_id}"
 
     final_data = None
@@ -60,10 +60,20 @@ def ask():
 
         time.sleep(2)
 
+    # 3) Extraire seulement le texte utile
+    answer = "Je n'ai pas trouvé de réponse."
+
+    if final_data and "attachments" in final_data:
+        for attachment in final_data["attachments"]:
+            if "text" in attachment and "content" in attachment["text"]:
+                answer = attachment["text"]["content"]
+                break
+
     return jsonify({
+        "answer": answer,
+        "status": final_data.get("status"),
         "conversation_id": conversation_id,
-        "message_id": message_id,
-        "result": final_data
+        "message_id": message_id
     })
 
 if __name__ == "__main__":
